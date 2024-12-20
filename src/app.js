@@ -3,36 +3,31 @@ const express = require('express');
 
 const app = express();
 
-// app.use('/ajay', (req,res) => { // this function handles the request
+app.get('/user', (req,res,next) => {
+   
+    
+    // res.send('response 1')
+    next();
+},
+(req,res,next) => {
+   
+    // res.send('response 2')
+    next();
+},
 
-//     res.send('Hello I am ajay')
-// })
+(req,res,next) => {
+   
+    // res.send('response 3')
+    next();
+},
 
-app.get('/user', (req,res) => {
+(req,res,next) => {
+   
+    res.send('response 4');
+    next();
+    
+},
 
-    res.send({'firstname':'ajay'})
-});
-
-app.post('/user', (req,res) => {
-
-    res.send('successfully saved into database')
-});
-
-app.delete('/user', (req,res) => {
-
-    res.send('data successfully deleted in database')
-});
-
-
-
-
-app.use('/test', (req,res) => { // this function handles the request
-
-    res.send('Hello from the server')
-})
-
-
-
-
+);
 
 app.listen(3000);// listening the req on port 3000
