@@ -43,12 +43,32 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
-
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId; // req.params comes from :userId
   const data = req.body;
 
   try {
+    const ALLOWED_UPDATES = [
+      "userId",
+      "photoUrl",
+      "about",
+      "gender",
+      "age",
+      "skills",
+    ]; // except these you cannot update or add any of the fields
+
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    // It loop through each key in object and make sure every key present in allowed updates
+    // If any of these keys not present in Allowed Updates isUpdates should be false
+    if (!isUpdateAllowed) {
+      throw new Error("update not allowed");
+    }
+    if(data?.skills.length > 10) {
+      throw new Error('Skills cannot be more than 10')
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true,
     });
