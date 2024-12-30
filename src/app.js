@@ -23,7 +23,7 @@ app.post("/signup", async (req, res) => {
     validateSignUpData(req);
     const { firstName, lastName, emailId, password } = req.body;
     // Encrypt the password
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);// password, number od salt rounds
 
     const user = new User({
       firstName,
@@ -48,10 +48,10 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password); // plain text,hash password
+    const isPasswordValid = await user.validatePassword(password); // plain text,hash password 
     if (isPasswordValid) {
       // if password,email valid create a JWT token
-      const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$777",{expiresIn: "1d"}); // when creating token hide some data inside it like user id, second pass some secret key and this will know only server.
+      const token = await user.getJWT();
       
       res.cookie("token", token,{ expies:new Date(Date.now() + 8 * 3600000)});
       res.send("login successfully");
