@@ -4,12 +4,16 @@ const connectDB = require("./config/database");
 
 const app = express();
 
-const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middlewares/auth");
+const User = require("./models/user");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   // creating a new instance user from req body data  ;
@@ -46,6 +50,10 @@ app.post("/login", async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password); // plain text,hash password
     if (isPasswordValid) {
+      // if password,email valid create a JWT token
+      const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$777",{expiresIn: "1d"}); // when creating token hide some data inside it like user id, second pass some secret key and this will know only server.
+      
+      res.cookie("token", token,{ expies:new Date(Date.now() + 8 * 3600000)});
       res.send("login successfully");
     } else {
       throw new Error("Invalid credentials");
@@ -55,79 +63,26 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
-
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const users = await User.findOne({ emailId: userEmail }); // returning promise and assigning to a user variable
-    if (users.length === 0) {
-      res.status(404).send("User not found");
-    } else {
-      res.send(users);
-    }
+    const user = req.user;
+    res.send(user);
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("ERROR : " + err.message);
   }
 });
 
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send(users);
-  } catch (err) {
-    res.status(400).send("Something went wrong");
-  }
-});
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  // user who authenticated only make this api call
 
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
+  const user = req.user;
 
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.send("user deleted successfully");
-  } catch (err) {
-    res.status(400).send("Something went wrong");
-  }
-});
-
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId; // req.params comes from :userId
-  const data = req.body;
-
-  try {
-    const ALLOWED_UPDATES = [
-      "userId",
-      "photoUrl",
-      "about",
-      "gender",
-      "age",
-      "skills",
-    ]; // except these you cannot update or add any of the fields
-
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    // It loop through each key in object and make sure every key present in allowed updates
-    // If any of these keys not present in Allowed Updates isUpdates should be false
-    if (!isUpdateAllowed) {
-      throw new Error("update not allowed");
-    }
-    if (data?.skills.length > 10) {
-      throw new Error("Skills cannot be more than 10");
-    }
-
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-      runValidators: true,
-    });
-    res.send("user updated successfully");
-  } catch (err) {
-    res.status(400).send("UPDATE failed:" + err.message);
-  }
+  res.send(user.firstName + " sent you connection request");
 });
 
 connectDB()
   .then(() => {
-    // Here we calling database connection function and connectDB will connect to the database
+    // Here we are calling database connection function, and connectDB will connect to the database
     // whenever it connected to DB ,it return a promise with then()
 
     console.log("Database connection established successfully");
