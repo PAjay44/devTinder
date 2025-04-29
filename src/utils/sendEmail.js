@@ -1,7 +1,7 @@
 const { SendEmailCommand } = require("@aws-sdk/client-ses");
 const { sesClient } = require("./sesClient.js");
 
-const createSendEmailCommand = (toAddress, fromAddress, subject, body) => {
+const createSendEmailCommand = (toAddress, fromAddress,subject,body) => {
   return new SendEmailCommand({
     Destination: {
       CcAddresses: [],
@@ -11,7 +11,7 @@ const createSendEmailCommand = (toAddress, fromAddress, subject, body) => {
       Body: {
         Html: {
           Charset: "UTF-8",
-          Data: `<h1>${body}</h1>`,
+          Data: `<h1>${body}/h1>`,
         },
         Text: {
           Charset: "UTF-8",
@@ -21,6 +21,7 @@ const createSendEmailCommand = (toAddress, fromAddress, subject, body) => {
       Subject: {
         Charset: "UTF-8",
         Data: subject,
+
       },
     },
     Source: fromAddress,
@@ -31,13 +32,13 @@ const createSendEmailCommand = (toAddress, fromAddress, subject, body) => {
 };
 
 // This is the actual code tosend an Email
-const run = async (subject, body, toEmailId) => {
+const run = async (subject,body) => {
   const sendEmailCommand = createSendEmailCommand(
-    "ajaypanidpau@gmail.com",// send email to MY TOADDRESS(my emailId)
-    "chowdaryajay@devtinders.in", // And the sender is  chowdaryajay@devtinders.in(fromAddress)
-    // Above both should be verified
+    "ajaypanidapu@gmail.com",// send email to MY TOADDRESS(my emailId)
+    "ajay@devtinders.in", // And the sender is  chowdaryajay@devtinders.in(fromAddress)
     subject,
     body
+    // Above both should be verified
   );
 
   try {
