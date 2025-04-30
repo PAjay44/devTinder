@@ -20,11 +20,13 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/userRouter");
+const staticPagesRouter = require("./routes/staticPages")
 
 app.use("/", authRouter); // '/' means it will match all the routes ,it will check the route if matches send the response
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", staticPagesRouter);
 
 connectDB()
   .then(() => {
