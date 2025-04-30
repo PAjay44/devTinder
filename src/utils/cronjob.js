@@ -1,10 +1,10 @@
-import { schedule } from "node-cron";
-import { subDays, startOfDay, endOfDay } from "date-fns";
-import { run } from "./sendEmail";
-import { find } from "../models/connectionRequest";
+const cron = require("node-cron");
+const { subDays, startOfDay, endOfDay } = require("date-fns");
+const sendEmail = require("./sendEmail.js");
+const ConnectionRequestModel = require("../models/connectionRequest");
 
 // This job will run at 8 AM in the morning everyday
-schedule("0 8 * * *", async () => {
+cron.schedule("0 8 * * *", async () => {
   // Send emails to all people who got requests the previous day
   try {
     const yesterday = subDays(new Date(), 1);
@@ -12,7 +12,7 @@ schedule("0 8 * * *", async () => {
     const yesterdayStart = startOfDay(yesterday);
     const yesterdayEnd = endOfDay(yesterday);
 
-    const pendingRequests = await find({
+    const pendingRequests = await ConnectionRequestModel.find({
       status: "interested",
       createdAt: {
         $gte: yesterdayStart,
@@ -29,7 +29,7 @@ schedule("0 8 * * *", async () => {
     for (const email of listOfEmails) {
       // Send Emails
       try {
-        const res = await run(
+        const res = await sendEmail.run(
           "New Friend Requests pending for " + email,
           "Ther eare so many frined reuests pending, please login to DevTinder.in and accept or reject the reqyests."
         );
