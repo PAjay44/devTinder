@@ -6,7 +6,7 @@ const cors = require("cors");
 
 require("dotenv").config();
 
-require('./utils/cronjob')
+// require('./utils/cronjob')
 
 const app = express();
 app.use(cors({
