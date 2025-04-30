@@ -33,7 +33,7 @@ app.use("/", staticPagesRouter);
 connectDB()
   .then(() => {
     console.log("Database connection established...");
-    server.listen(process.env.PORT, () => {
+    app.listen(process.env.PORT, () => {
       console.log("Server is successfully listening on port 3000...");
     });
     // Here we are calling database connection function, and connectDB will connect to the database
